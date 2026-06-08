@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGraphMix — Pretraining Data Selection via Web Graph Centrality</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,400..600&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16181d;
+    --paper:#f6f3ec;
+    --paper-2:#efe9dd;
+    --line:#d9d2c4;
+    --muted:#6b675d;
+    --hub:#d8483a;        /* central / hub  */
+    --hub-soft:#e89b8f;
+    --fringe:#2f7d6b;     /* peripheral / fringe */
+    --fringe-soft:#86bdaf;
+    --gold:#b88a2e;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Hanken Grotesk",sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--hub);color:var(--paper)}
+  a{color:inherit}
+
+  /* ---------- grain / texture ---------- */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:64px 0 50px;border-bottom:1px solid var(--line);overflow:hidden}
+  #net{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.9}
+  .hero-veil{position:absolute;inset:0;z-index:1;
+    background:radial-gradient(120% 90% at 70% 0%,rgba(246,243,236,0) 35%,rgba(246,243,236,.85) 78%,var(--paper) 100%);}
+  .hero .wrap{position:relative;z-index:2}
+
+  .eyebrow{
+    font-family:"Spline Sans Mono",monospace;font-size:.72rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--hub);display:flex;align-items:center;gap:10px;margin-bottom:22px;
+  }
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--hub)}
+
+  h1.title{
+    font-family:"Fraunces",serif;font-weight:600;font-size:clamp(2.4rem,6.2vw,4.4rem);
+    line-height:.99;letter-spacing:-.015em;max-width:14ch;
+  }
+  h1.title .q{font-style:italic;font-weight:400;color:var(--hub)}
+  .subtitle{
+    font-family:"Fraunces",serif;font-size:clamp(1.05rem,2.4vw,1.5rem);font-weight:400;
+    color:var(--ink);margin-top:18px;max-width:30ch;letter-spacing:-.01em;
+  }
+  .subtitle b{font-weight:600;background:linear-gradient(transparent 62%,var(--hub-soft) 62%);padding:0 .1em}
+
+  /* authors */
+  .authors{margin-top:34px;display:flex;flex-wrap:wrap;gap:6px 30px;font-size:1.02rem}
+  .author{font-weight:600}
+  .author sup{font-weight:500;color:var(--hub);font-size:.7em}
+  .affil{margin-top:12px;color:var(--muted);font-size:.86rem;font-family:"Spline Sans Mono",monospace}
+  .affil span{color:var(--hub);font-weight:600}
+
+  /* buttons */
+  .links{margin-top:38px;display:flex;flex-wrap:wrap;gap:12px}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;text-decoration:none;
+    padding:11px 20px;border:1.5px solid var(--ink);border-radius:2px;
+    font-weight:600;font-size:.92rem;background:var(--ink);color:var(--paper);
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease,color .18s ease;
+  }
+  .btn svg{width:16px;height:16px}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hub)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{box-shadow:5px 5px 0 var(--fringe)}
+  .btn.soon{opacity:.55;cursor:not-allowed}
+  .btn.soon:hover{transform:none;box-shadow:none}
+  .btn .tag{font-family:"Spline Sans Mono",monospace;font-size:.62rem;border:1px solid currentColor;
+    border-radius:99px;padding:1px 7px;opacity:.8;letter-spacing:.04em}
+
+  /* ---------- stat strip ---------- */
+  .strip{background:var(--ink);color:var(--paper);border-bottom:1px solid var(--ink)}
+  .strip-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+  .stat{padding:30px 24px;border-right:1px solid rgba(246,243,236,.14)}
+  .stat:last-child{border-right:none}
+  .stat .num{font-family:"Fraunces",serif;font-size:2.15rem;font-weight:600;line-height:1}
+  .stat .num .arrow{color:var(--hub-soft);font-size:1.1rem;font-style:italic;font-weight:400}
+  .stat .lab{font-size:.78rem;color:#b9b3a6;margin-top:9px;line-height:1.4;
+    font-family:"Spline Sans Mono",monospace;letter-spacing:.02em}
+
+  /* ---------- sections ---------- */
+  section{padding:78px 0}
+  .sec-num{font-family:"Spline Sans Mono",monospace;font-size:.74rem;letter-spacing:.2em;
+    color:var(--hub);text-transform:uppercase;margin-bottom:14px;display:block}
+  h2{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(1.7rem,3.6vw,2.5rem);
+    letter-spacing:-.015em;line-height:1.05;margin-bottom:26px;max-width:18ch}
+  h2 em{font-style:italic;color:var(--fringe);font-weight:400}
+  p.lead{font-size:1.12rem;max-width:62ch;color:#33342f}
+  p.body{max-width:64ch;color:#3a3b35;margin-top:16px}
+
+  .divider{height:1px;background:var(--line);max-width:var(--maxw);margin:0 auto}
+
+  /* abstract callout */
+  .abstract{background:var(--paper-2);border:1px solid var(--line);border-left:4px solid var(--hub);
+    padding:34px 36px;border-radius:3px;font-size:1.05rem;line-height:1.72;color:#33342f;max-width:none}
+  .abstract::first-letter{font-family:"Fraunces",serif;font-size:3.1rem;float:left;line-height:.8;
+    padding:6px 12px 0 0;color:var(--hub);font-weight:600}
+
+  /* dual concept cards */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}
+  .card{padding:30px 28px;border-radius:4px;border:1px solid var(--line);position:relative;overflow:hidden}
+  .card.hub{background:linear-gradient(160deg,#fbeae6,#f6ddd6)}
+  .card.fringe{background:linear-gradient(160deg,#e2efea,#d4e8e0)}
+  .card .ico{width:46px;height:46px;margin-bottom:16px}
+  .card h3{font-family:"Fraunces",serif;font-size:1.4rem;font-weight:600;margin-bottom:8px}
+  .card.hub h3{color:var(--hub)}
+  .card.fringe h3{color:var(--fringe)}
+  .card .kicker{font-family:"Spline Sans Mono",monospace;font-size:.68rem;letter-spacing:.16em;
+    text-transform:uppercase;opacity:.7;margin-bottom:14px}
+  .card p{font-size:.96rem;color:#3a3b35}
+  .card .win{margin-top:16px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px}
+  .card.hub .win{color:var(--hub)}
+  .card.fringe .win{color:var(--fringe)}
+
+  /* method steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:38px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .step{padding:30px 26px;border-right:1px solid var(--line);background:var(--paper)}
+  .step:last-child{border-right:none}
+  .step .n{font-family:"Spline Sans Mono",monospace;font-size:.72rem;color:var(--hub);letter-spacing:.1em}
+  .step h4{font-family:"Fraunces",serif;font-size:1.22rem;font-weight:600;margin:10px 0}
+  .step p{font-size:.9rem;color:#46473f}
+  .step code{font-family:"Spline Sans Mono",monospace;font-size:.82em;background:var(--paper-2);
+    padding:1px 6px;border-radius:3px;border:1px solid var(--line)}
+
+  /* table */
+  .tablewrap{overflow-x:auto;margin-top:8px;border:1px solid var(--line);border-radius:4px}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:.92rem;background:var(--paper)}
+  caption{caption-side:bottom;text-align:left;font-size:.8rem;color:var(--muted);padding:14px 18px;font-style:italic}
+  th,td{padding:12px 14px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left;font-weight:600}
+  thead th{font-family:"Spline Sans Mono",monospace;font-size:.72rem;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1.5px solid var(--ink)}
+  tbody tr:hover{background:var(--paper-2)}
+  tr.ours{background:#fbeae6}
+  tr.ours:hover{background:#f7ddd5}
+  tr.ours td:first-child{color:var(--hub)}
+  tr.best td{font-weight:700}
+  .avg{font-weight:700;border-left:1px solid var(--line)}
+  .delta{font-family:"Spline Sans Mono",monospace;font-size:.7rem;color:var(--fringe);margin-left:5px}
+
+  /* findings list */
+  .findings{margin-top:30px;display:grid;gap:2px}
+  .finding{display:grid;grid-template-columns:130px 1fr;gap:24px;padding:22px 0;border-top:1px solid var(--line);align-items:start}
+  .finding:last-child{border-bottom:1px solid var(--line)}
+  .finding .tag2{font-family:"Spline Sans Mono",monospace;font-size:.74rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--hub);padding-top:3px}
+  .finding p{font-size:1rem;color:#33342f}
+  .finding b{font-weight:700}
+
+  /* bibtex */
+  .bibtex{background:var(--ink);color:#e9e4d8;border-radius:4px;padding:26px 28px;position:relative;
+    font-family:"Spline Sans Mono",monospace;font-size:.84rem;line-height:1.7;overflow-x:auto}
+  .bibtex .k{color:var(--hub-soft)}
+  .bibtex .v{color:var(--fringe-soft)}
+  .copy{position:absolute;top:16px;right:16px;background:transparent;border:1px solid rgba(233,228,216,.3);
+    color:#e9e4d8;font-family:"Spline Sans Mono",monospace;font-size:.7rem;padding:6px 12px;border-radius:3px;
+    cursor:pointer;letter-spacing:.06em;transition:all .15s}
+  .copy:hover{background:var(--hub);border-color:var(--hub)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:.84rem}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}
+  footer .dot{color:var(--hub)}
+
+  /* ---------- affiliation logos ---------- */
+  .affiliations{margin-top:44px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  .aff-label{font-family:"Spline Sans Mono",monospace;font-size:.64rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--muted)}
+  .aff{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);
+    opacity:.95;transition:transform .2s ease,opacity .2s ease}
+  .aff:hover{transform:translateY(-2px);opacity:1}
+  .pu-logo{height:46px;width:auto;display:block;flex-shrink:0}
+  .pli-img{height:44px;width:auto;display:block}
+  .aff-sep{width:1px;height:38px;background:var(--line)}
+  footer .aff{opacity:.9}
+  footer .pu-logo{height:38px}
+  footer .pli-img{height:36px}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:780px){
+    .strip-grid{grid-template-columns:1fr 1fr}
+    .stat:nth-child(2){border-right:none}
+    .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid rgba(246,243,236,.14)}
+    .duo{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr}
+    .step{border-right:none;border-bottom:1px solid var(--line)}
+    .step:last-child{border-bottom:none}
+    .finding{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <canvas id="net"></canvas>
+  <div class="hero-veil"></div>
+  <div class="wrap">
+    <div class="eyebrow">Preprint · Pretraining Data Curation</div>
+    <h1 class="title">Hubs or <span class="q">Fringes?</span></h1>
+    <p class="subtitle">Pretraining data selection via <b>web graph centrality</b> — no classifiers, no labels, no proxy training.</p>
+
+    <div class="authors">
+      <span class="author">Vedant Badoni<sup>1</sup></span>
+      <span class="author">Danqi Chen<sup>1,2</sup></span>
+      <span class="author">Xinyi Wang<sup>2</sup></span>
+    </div>
+    <div class="affil"><span>1</span> Department of Computer Science, Princeton &nbsp;·&nbsp; <span>2</span> Princeton Language and Intelligence</div>
+
+    <div class="links">
+      <a class="btn" href="https://wangxinyilinda.github.io/pdf/WebGraphMix.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Paper <span class="tag">PDF</span>
+      </a>
+      <a class="btn ghost" href="https://github.com/princeton-pli/WebGraphMix" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
+        Code <span class="tag">GitHub</span>
+      </a>
+      <a class="btn ghost" href="https://huggingface.co/collections/PrincetonPLI/webgraphmix" target="_blank" rel="noopener">
+        <span style="font-size:1.05rem;line-height:1">🤗</span>
+        Hugging Face
+      </a>
+    </div>
+
+    <div class="affiliations">
+      <span class="aff-label">Affiliations</span>
+      <a class="aff" href="https://www.princeton.edu" target="_blank" rel="noopener" aria-label="Princeton University">
+        <img class="pu-logo" src="princeton_logo.png" alt="Princeton University">
+      </a>
+      <span class="aff-sep"></span>
+      <a class="aff" href="https://pli.princeton.edu" target="_blank" rel="noopener" aria-label="Princeton Language and Intelligence">
+        <img class="pli-img" src="pli_logo.png" alt="Princeton Language and Intelligence">
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== STAT STRIP ===================== -->
+<div class="strip">
+  <div class="wrap" style="padding:0">
+    <div class="strip-grid">
+      <div class="stat"><div class="num">39.8 <span class="arrow">→</span> 43.8</div><div class="lab">Avg accuracy: uniform → ours+quality (1B, 23 tasks)</div></div>
+      <div class="stat"><div class="num">13.9M</div><div class="lab">Host nodes &amp; 439.6M edges in the web graph</div></div>
+      <div class="stat"><div class="num">&lt; 9</div><div class="lab">GPU-hours to compute all centrality scores, once</div></div>
+      <div class="stat"><div class="num">0</div><div class="lab">Classifiers, labels, proxy models or taxonomies</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ABSTRACT ===================== -->
+<section>
+  <div class="wrap reveal">
+    <span class="sec-num">01 — Abstract</span>
+    <div class="abstract">
+      Modern language model performance depends critically on pretraining data composition, yet existing selection methods lean on auxiliary classifiers or mixture optimization, adding compute and a dependence on labeled data. We propose <strong>WebGraphMix</strong>, a lightweight graph-based framework that computes structural centrality scores over the Common Crawl host-level web graph and varies the proportion of central versus peripheral documents in the pretraining mixture. Central hosts expose models to reusable abstractions; peripheral hosts encode specialized, long-tail knowledge. Integrated into the DataComp-LM pipeline and trained at 400M and 1B scales across 23 tasks, a 1:1 central–peripheral mixture reaches <strong>41.4%</strong> average versus 39.8% for uniform sampling, and combining structural scores with a quality classifier lifts this to <strong>43.8%</strong> — showing that web graph topology is a meaningful curation axis, largely orthogonal to content-based approaches.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== CENTRAL VS PERIPHERAL ===================== -->
+<section>
+  <div class="wrap reveal">
+    <span class="sec-num">02 — The Hypothesis</span>
+    <h2>A document's <em>position</em> in the web graph shapes what a model learns from it.</h2>
+    <p class="lead">The web is fundamentally a graph: hosts link to one another, encoding topical structure and information flow. Where a document sits in that network turns out to predict the <em>kind</em> of capability it contributes during pretraining.</p>
+
+    <div class="duo">
+      <div class="card hub">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#d8483a" stroke-width="2">
+          <circle cx="24" cy="24" r="7" fill="#d8483a" fill-opacity="0.18"/>
+          <circle cx="24" cy="8" r="3"/><circle cx="40" cy="18" r="3"/><circle cx="36" cy="38" r="3"/><circle cx="10" cy="36" r="3"/><circle cx="6" cy="16" r="3"/>
+          <path d="M24 17V11M30 24l8-5M28 28l7 8M19 28l-7 6M18 21 9 17"/>
+        </svg>
+        <div class="kicker">Top-K · Central</div>
+        <h3>Hubs &amp; Bridges</h3>
+        <p>Highly connected hosts (think major reference and platform sites) lie on many shortest paths and co-occur with heterogeneous contexts — surfacing broadly reusable, procedural patterns.</p>
+        <div class="win">↗ Strongest gains on Symbolic &amp; Algorithmic Reasoning (+1.4%)</div>
+      </div>
+      <div class="card fringe">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#2f7d6b" stroke-width="2">
+          <circle cx="10" cy="14" r="3"/><circle cx="38" cy="11" r="3"/><circle cx="42" cy="34" r="3"/><circle cx="14" cy="40" r="3"/><circle cx="24" cy="24" r="3"/><circle cx="30" cy="38" r="3"/>
+          <path d="M12 16l10 7M36 13l-12 9M40 33l-15-8" stroke-dasharray="2 3"/>
+        </svg>
+        <div class="kicker">Bottom-K · Peripheral</div>
+        <h3>The Long Tail</h3>
+        <p>Sparsely linked hosts — small organizations, niche communities, non-English content — carry specialized, long-tail knowledge that the dense core of the web simply doesn't repeat.</p>
+        <div class="win">↗ Improves Science &amp; Factual Knowledge and Commonsense</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== METHOD ===================== -->
+<section>
+  <div class="wrap reveal">
+    <span class="sec-num">03 — How WebGraphMix Works</span>
+    <h2>Three steps. <em>One</em> reusable preprocessing pass.</h2>
+    <p class="lead">Centrality is computed once over the public host graph using GPU-parallel graph algorithms (cuGraph), then inherited by every document from that host — Katz in under 3 hours on one H100, betweenness in under 6 hours on four.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">STEP 01</div>
+        <h4>Score the graph</h4>
+        <p>Build the directed host-level graph and compute <code>Betweenness</code> (cross-community bridging) and <code>Katz</code> (recursive influence) centrality for all 13.9M hosts.</p>
+      </div>
+      <div class="step">
+        <div class="n">STEP 02</div>
+        <h4>Sample by position</h4>
+        <p>Draw documents <code>Top-K</code> (central), <code>Bottom-K</code> (peripheral), or a <code>Mixed</code> α : (100−α) ratio under a fixed token budget.</p>
+      </div>
+      <div class="step">
+        <div class="n">STEP 03</div>
+        <h4>Optionally fuse quality</h4>
+        <p>Normalize and combine centrality with DCLM-fasttext quality scores — multiplicative/divisive for the sharpest, most complementary signal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== RESULTS TABLE ===================== -->
+<section>
+  <div class="wrap reveal">
+    <span class="sec-num">04 — Main Results</span>
+    <h2>Mixing beats either extreme — and stacks on top of quality.</h2>
+    <p class="body" style="margin-bottom:28px">DCLM CORE v2 accuracy at 1B scale (1.4B params, 28B tokens), averaged by capability category. <strong>WebGraphMix</strong> uses betweenness with a 50/50 Top-K/Bottom-K mixture; <strong>WebGraphMix+</strong> additionally fuses the DCLM-fasttext quality score.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Commons.</th><th>Compreh.</th><th>Knowl.</th><th>Reason.</th><th>Lang.</th><th class="avg">Avg</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Random</td><td>57.3</td><td>37.9</td><td>34.2</td><td>19.0</td><td>39.9</td><td class="avg">39.8</td></tr>
+          <tr><td>Quality</td><td>59.8</td><td>38.1</td><td>38.9</td><td>20.7</td><td>42.8</td><td class="avg">42.3</td></tr>
+          <tr><td>WebOrganizer</td><td>59.6</td><td>39.2</td><td>38.0</td><td>22.5</td><td>38.3</td><td class="avg">42.1</td></tr>
+          <tr><td>WebOrganizer+</td><td>61.9</td><td>41.4</td><td>39.1</td><td>21.9</td><td>38.8</td><td class="avg">43.4</td></tr>
+          <tr><td>PageRank</td><td>56.9</td><td>37.4</td><td>34.8</td><td>19.3</td><td>38.1</td><td class="avg">39.6</td></tr>
+          <tr class="ours"><td>WebGraphMix</td><td>59.5</td><td>39.4</td><td>35.4</td><td>21.4</td><td>40.2</td><td class="avg">41.4</td></tr>
+          <tr class="ours best"><td>WebGraphMix+</td><td>60.8</td><td>42.6</td><td>39.7</td><td>22.6</td><td>41.9</td><td class="avg">43.8</td></tr>
+        </tbody>
+        <caption>Table 1 — Per-category accuracy on the 23-task DCLM CORE v2 benchmark at 1B scale. WebGraphMix+ matches taxonomy-based WebOrganizer+ while requiring no proxy training, labeled targets, or benchmark-specific tuning.</caption>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== FINDINGS ===================== -->
+<section>
+  <div class="wrap reveal">
+    <span class="sec-num">05 — What We Found</span>
+    <h2>Structural position is <em>capability-dependent</em>.</h2>
+
+    <div class="findings">
+      <div class="finding">
+        <div class="tag2">Complementary</div>
+        <p><b>Central and peripheral regions encode different knowledge.</b> Bottom-K sampling consistently lifts factual and commonsense knowledge, while central hosts contribute more structured, procedural signal for symbolic reasoning.</p>
+      </div>
+      <div class="finding">
+        <div class="tag2">Inverted-U</div>
+        <p><b>A roughly balanced mixture is best.</b> For betweenness, the 50/50 split (41.4%) beats both 25/75 (40.5%) and 75/25 (41.0%) — too much of either extreme hurts. Neither central nor peripheral documents should dominate.</p>
+      </div>
+      <div class="finding">
+        <div class="tag2">Orthogonal</div>
+        <p><b>Centrality adds value on top of quality.</b> All 18 quality-combination configurations exceed the quality-only baseline; the best (Multiply Betweenness 50% Top) reaches 43.8% — a +1.5% lift over quality alone and +4.0% over random.</p>
+      </div>
+      <div class="finding">
+        <div class="tag2">Scales up</div>
+        <p><b>The benefit grows with model size.</b> The best-mixture gain rises from +0.1% at 400M to +1.6% at 1B, consistent with scaling behavior in other data-selection work — suggesting larger gains at larger scales.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== BIBTEX ===================== -->
+<section>
+  <div class="wrap reveal">
+    <span class="sec-num">06 — Citation</span>
+    <h2>Cite this work</h2>
+    <div class="bibtex" id="bib">
+      <button class="copy" onclick="copyBib(this)">COPY</button><pre style="margin:0;white-space:pre-wrap"><span class="k">@article</span>{badoni2025webgraphmix,
+  <span class="k">title</span>   = {<span class="v">Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality</span>},
+  <span class="k">author</span>  = {<span class="v">Badoni, Vedant and Chen, Danqi and Wang, Xinyi</span>},
+  <span class="k">journal</span> = {<span class="v">arXiv preprint</span>},
+  <span class="k">year</span>    = {<span class="v">2025</span>}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="affiliations" style="margin-top:0">
+      <a class="aff" href="https://www.princeton.edu" target="_blank" rel="noopener" aria-label="Princeton University">
+        <img class="pu-logo" src="princeton_logo.png" alt="Princeton University">
+      </a>
+      <span class="aff-sep"></span>
+      <a class="aff" href="https://pli.princeton.edu" target="_blank" rel="noopener" aria-label="Princeton Language and Intelligence">
+        <img class="pli-img" src="pli_logo.png" alt="Princeton Language and Intelligence">
+      </a>
+    </div>
+    <div style="text-align:right;line-height:1.5">WebGraphMix <span class="dot">·</span> 2025<br>Corpus &amp; scripts released upon acceptance</div>
+  </div>
+</footer>
+
+<script>
+/* ---------- reveal on scroll ---------- */
+const io = new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);}});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ---------- copy bibtex ---------- */
+function copyBib(btn){
+  const text = document.querySelector('#bib pre').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const o=btn.textContent; btn.textContent='COPIED'; setTimeout(()=>btn.textContent=o,1400);
+  });
+}
+
+/* ---------- animated host-graph background ---------- */
+(function(){
+  const c=document.getElementById('net'), x=c.getContext('2d');
+  let W,H,nodes=[],edges=[];
+  const HUB='#d8483a', FRINGE='#2f7d6b', LINE='rgba(60,60,60,';
+  function resize(){
+    const r=c.getBoundingClientRect();
+    W=c.width=r.width*devicePixelRatio; H=c.height=r.height*devicePixelRatio;
+    x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    build(r.width,r.height);
+  }
+  function build(w,h){
+    nodes=[]; edges=[];
+    const N = w<640?22:40;
+    for(let i=0;i<N;i++){
+      // a few large central hubs, many small peripheral nodes
+      const central = i<Math.max(3,N*0.18);
+      nodes.push({
+        x:Math.random()*w, y:Math.random()*h*0.95,
+        vx:(Math.random()-.5)*0.18, vy:(Math.random()-.5)*0.18,
+        r: central? (8+Math.random()*10) : (1.6+Math.random()*2.6),
+        hub: central
+      });
+    }
+    // connect peripheral nodes mostly to hubs (bridge structure)
+    const hubs=nodes.map((n,i)=>n.hub?i:-1).filter(i=>i>=0);
+    nodes.forEach((n,i)=>{
+      if(n.hub){
+        hubs.forEach(j=>{ if(j>i && Math.random()<0.5) edges.push([i,j]); });
+      } else {
+        const h1=hubs[Math.floor(Math.random()*hubs.length)];
+        edges.push([i,h1]);
+        if(Math.random()<0.25){const h2=hubs[Math.floor(Math.random()*hubs.length)];edges.push([i,h2]);}
+      }
+    });
+  }
+  function step(){
+    const w=W/devicePixelRatio, h=H/devicePixelRatio;
+    x.clearRect(0,0,w,h);
+    // edges
+    edges.forEach(([a,b])=>{
+      const n1=nodes[a],n2=nodes[b];
+      const d=Math.hypot(n1.x-n2.x,n1.y-n2.y);
+      const alpha=Math.max(0,0.16-d/2600);
+      x.strokeStyle=LINE+alpha+')'; x.lineWidth=0.6;
+      x.beginPath(); x.moveTo(n1.x,n1.y); x.lineTo(n2.x,n2.y); x.stroke();
+    });
+    // nodes
+    nodes.forEach(n=>{
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>w)n.vx*=-1; if(n.y<0||n.y>h)n.vy*=-1;
+      x.beginPath(); x.arc(n.x,n.y,n.r,0,7);
+      if(n.hub){ x.fillStyle='rgba(216,72,58,0.85)'; x.fill();
+        x.beginPath(); x.arc(n.x,n.y,n.r,0,7); x.strokeStyle='rgba(216,72,58,0.25)'; x.lineWidth=6; x.stroke();
+      } else { x.fillStyle='rgba(47,125,107,0.7)'; x.fill(); }
+    });
+    requestAnimationFrame(step);
+  }
+  window.addEventListener('resize',resize);
+  resize(); step();
+})();
+</script>
+</body>
+</html>
