@@ -1,6 +1,6 @@
 # WebGraphMix
 
-Official code release for **Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality** ([paper](https://wangxinyilinda.github.io/pdf/WebGraphMix.pdf) [Project Page](https://princeton-pli.github.io/WebGraphMix/)).
+Official code release for **Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality** [[Paper](https://wangxinyilinda.github.io/pdf/WebGraphMix.pdf)][[Project Page](https://princeton-pli.github.io/WebGraphMix/))].
 
 ![Subgraph of the Common Crawl host-level web graph. Node size is proportional to their Betweenness centrality score.](assets/web_subgraph.png)
 
