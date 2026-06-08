@@ -1,0 +1,14 @@
+# WebGraphMix graph pipeline dependencies (install alongside dclm/requirements.txt)
+simple_parsing>=0.1.5
+datatools==0.1.2
+networkx>=3.0
+numpy>=1.24
+pandas>=2.0
+zstandard>=0.21
+requests>=2.28
+
+# GPU centrality (optional; only needed to recompute scores)
+# cugraph-cu12>=24.0
+# dask-cuda>=24.0
+# dask-cudf-cu12>=24.0
+# nx-cugraph-cu12>=0.3

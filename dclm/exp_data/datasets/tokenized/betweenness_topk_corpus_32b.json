@@ -1,0 +1,20 @@
+{
+    "uuid": "45445678-1234-0004-1234-567432345678",
+    "name": "betweenness_topk_corpus_32b",
+    "dataset_url": "${DATA_ROOT}/../tokenized_importance_sampled_documents/centrality_only/topk/nonsampling_distribution/betweenness_corpus_32b",
+    "manifest_url": "${DATA_ROOT}/../tokenized_importance_sampled_documents/centrality_only/topk/nonsampling_distribution/betweenness_corpus_32b/manifest.jsonl",
+    "sources": [
+        {
+            "uuid": "c999e1c9-9001-4e05-8fe7-3bfd20178487",
+            "name": "rw_v2_w_substr_cc_v3_f0.15_resiliparse"
+        }
+    ],
+    "tokenized": true,
+    "tokenizer": "tokenizers/gpt_neox_tokenizer.json",
+    "num_tokens": 1493925611091,
+    "size": 4024545303965,
+    "dcnlp_commit_hash": "5e076796dcd4e57edb99ab81876681cf50f79b2c",
+    "dcnlp_diff": "",
+    "data_key": "json.gz",
+    "sampling_yaml": null
+}

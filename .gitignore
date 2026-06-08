@@ -1,0 +1,28 @@
+**/*.pt
+**/*.pth
+**/checkpoints/**/*
+!**/checkpoints/.gitkeep
+
+# Large precomputed artifacts — host on HuggingFace (see experiments/artifacts/download.sh)
+pipeline/graph/centrality/results/*
+!pipeline/graph/centrality/results/.gitkeep
+pipeline/graph/centrality/host_doc_counts.json
+pipeline/graph/centrality/host_token_counts.json
+
+# Runtime / local data
+corpus_200b/
+pipeline/graph/data/*
+importance_sampled_documents/
+tokenized_importance_sampled_documents/
+tokshuf_tmp*/
+logs/
+outputs/
+wandb/
+*.out
+scores.xlsx
+**/*.log
+
+# Python
+__pycache__/
+*.egg-info/
+.env

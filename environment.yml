@@ -1,0 +1,11 @@
+name: webgraphmix
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - rust
+  - pip:
+    - -r requirements-graph.txt
+    - -r dclm/requirements.txt
