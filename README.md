@@ -129,7 +129,7 @@ To upload (maintainers):
 
 ```bibtex
 @article{badoni2026webgraphmix,
-  title={Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality},
+  title={Hubs or Fringes: Pretraining Data Selection via Web Graph Centrality},
   author={Badoni, Vedant and Chen, Danqi and Wang, Xinyi},
   year={2026}
 }
