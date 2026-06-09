@@ -1,6 +1,6 @@
 # WebGraphMix
 
-Official code release for **Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality** [[Paper](https://wangxinyilinda.github.io/pdf/WebGraphMix.pdf)][[Project Page](https://princeton-pli.github.io/WebGraphMix/))].
+Official code release for **Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality** [[Paper](https://wangxinyilinda.github.io/pdf/WebGraphMix.pdf)][[Project Page](https://princeton-pli.github.io/WebGraphMix/)].
 
 ![Subgraph of the Common Crawl host-level web graph. Node size is proportional to their Betweenness centrality score.](assets/web_subgraph.png)
 
@@ -111,7 +111,7 @@ Download instead of recomputing:
 | Artifact | Size (approx.) | Contents |
 |----------|----------------|----------|
 | Centrality scores | ~1.8 GB | `host_graph_scores_{betweenness,katz,eigenvector}_*.json` |
-| 1B checkpoints | ~17 GB each | random, quality, betweenness 50top, multiply 50top |
+| 1B checkpoints | ~17 GB each | random, quality, betweenness 50/50, multiply 50/50 |
 
 To upload (maintainers):
 
@@ -123,9 +123,7 @@ To upload (maintainers):
 
 - **tokshuf-rs whitespace:** When tokenizing very large corpora, ensure each JSONL record ends with a newline. tokshuf-rs may fail silently on malformed line boundaries; see `dclm/rust_processing/tokshuf-rs/run_rust_tokenizer.sh`.
 - **tokshuf local cells:** Create a temp directory (e.g. `tokshuf_tmp/`) via `LOCAL_CELL_DIR`; do not commit these directories.
-- **`datatools`:** Required by `pipeline/sampling/select_training_data.py`; install via `pip install datatools==0.1.2` (see `requirements-graph.txt`).
-- **DCLM `setup.py`:** Run `pip install -e dclm/` from the `dclm/` directory; see upstream DCLM README for asset downloads.
-- **WebOrganizer baseline:** Not included. Download 1B baseline weights from WebOrganizer's HuggingFace page for Table 1 comparison.
+<!-- - **`datatools`:** Required by `pipeline/sampling/select_training_data.py`; install via `pip install datatools==0.1.2` (see `requirements-graph.txt`). -->
 
 ## Citation
 
