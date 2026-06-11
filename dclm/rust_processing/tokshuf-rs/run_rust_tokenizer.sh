@@ -6,10 +6,6 @@
 #   OUTPUT_DIR=/path/to/tokenized/output \
 #   LOCAL_CELL_DIR=/path/to/tokshuf_tmp \
 #   ./dclm/rust_processing/tokshuf-rs/run_rust_tokenizer.sh
-#
-# Note on whitespace: tokshuf-rs expects documents with a trailing newline per record.
-# If tokenization fails on large corpora, ensure each jsonl line ends with '\n' and
-# re-run after `cargo build --release` in this directory.
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "$0")/../../.." && pwd)}"

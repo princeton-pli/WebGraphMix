@@ -121,7 +121,6 @@ To upload (maintainers):
 
 ## Known issues
 
-- **tokshuf-rs whitespace:** When tokenizing very large corpora, ensure each JSONL record ends with a newline. tokshuf-rs may fail silently on malformed line boundaries; see `dclm/rust_processing/tokshuf-rs/run_rust_tokenizer.sh`.
 - **tokshuf local cells:** Create a temp directory (e.g. `tokshuf_tmp/`) via `LOCAL_CELL_DIR`; do not commit these directories.
 <!-- - **`datatools`:** Required by `pipeline/sampling/select_training_data.py`; install via `pip install datatools==0.1.2` (see `requirements-graph.txt`). -->
 
