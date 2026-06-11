@@ -19,19 +19,6 @@ EVAL_DIR = os.environ.get(
 # fill in your files here — map filename -> short column label for the comparison sheet:
 files_to_process = {
     "evaluation_baseline_random_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "baseline",
-    "evaluation_quality_only_dclmfilter_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "quality",
-    "evaluation_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "betweenness 50top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply betweenness 50top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_25top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness 25top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness 50top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_75top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness 75top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness bottomk",
-    "evaluation_centralitydclmfilteradd_betweenness_topk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add betweenness topk",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_25top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness 25top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness 50top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_75top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness 75top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness bottomk",
-    "evaluation_centralitydclmfiltermultiply_betweenness_topk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply betweenness topk",
 }
 
 OUTPUT_FILENAME = os.environ.get("OUTPUT_FILENAME", "scores.xlsx")
