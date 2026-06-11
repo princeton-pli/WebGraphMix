@@ -22,7 +22,7 @@ cd dclm && pip install -e . && cd ..
 # 2. Download a pretrained 1B checkpoint
 ./experiments/artifacts/download.sh checkpoints
 
-# 3. Evaluate derfault model on DCLM CORE v2 (23 tasks)
+# 3. Evaluate default model on DCLM CORE v2 (23 tasks)
 export REPO_ROOT=$(pwd)
 ./experiments/eval/mmlu_and_lowvar.sh
 
