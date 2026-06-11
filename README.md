@@ -78,7 +78,7 @@ Training uses `torchrun -m training.train` with scale `1b_1x_fast` (~28B tokens)
 ## Repository layout
 
 ```text
-WebGraphMix_Public/
+WebGraphMix/
 ├── lib/
 │   └── paths.py                    # Central path configuration (REPO_ROOT, DATA_ROOT, etc.)
 ├── pipeline/
