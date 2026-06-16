@@ -11,27 +11,12 @@ EVAL_DIR = os.environ.get(
     os.path.join(os.path.dirname(os.path.abspath(__file__))),
 )
 
-# Example paths (relative to EVAL_DIR):
-#   evaluation_baseline_random_corpus_32b-open_lm_1b_swiglutorch-..._mmlu_and_lowvar.json
-#   evaluation_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-..._mmlu_and_lowvar.json
-#   evaluation_centralitydclmfiltermultiply_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-..._mmlu_and_lowvar.json
-#
-# fill in your files here — map filename -> short column label for the comparison sheet:
+# Names match HuggingFace checkpoint folders (PrincetonPLI/WebGraphMix-openlm-1B).
 files_to_process = {
-    "evaluation_baseline_random_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "baseline",
-    "evaluation_quality_only_dclmfilter_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "quality",
-    "evaluation_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "betweenness 50top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply betweenness 50top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_25top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness 25top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness 50top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_75top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness 75top",
-    "evaluation_centralitydclmfilteradd_betweenness_subtract_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add subtract betweenness bottomk",
-    "evaluation_centralitydclmfilteradd_betweenness_topk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "add betweenness topk",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_25top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness 25top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness 50top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_75top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness 75top",
-    "evaluation_centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply divide betweenness bottomk",
-    "evaluation_centralitydclmfiltermultiply_betweenness_topk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000_mmlu_and_lowvar.json": "multiply betweenness topk",
+    "evaluation_random_selection_mmlu_and_lowvar.json": "random baseline",
+    "evaluation_dclm_fasttext_only_mmlu_and_lowvar.json": "quality (DCLM-fasttext)",
+    "evaluation_betweenness_alpha0.5_mmlu_and_lowvar.json": "WebGraphMix 50/50",
+    "evaluation_betweenness_alpha0.5_mult_div_dclm_fasttext_mmlu_and_lowvar.json": "WebGraphMix+ multiply 50/50",
 }
 
 OUTPUT_FILENAME = os.environ.get("OUTPUT_FILENAME", "scores.xlsx")

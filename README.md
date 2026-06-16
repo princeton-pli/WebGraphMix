@@ -1,6 +1,6 @@
 # WebGraphMix
 
-Official code release for **Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality** [[Paper](https://wangxinyilinda.github.io/pdf/WebGraphMix.pdf)][[Project Page](https://princeton-pli.github.io/WebGraphMix/)].
+Official code release for **Hubs or Fringes? Pretraining Data Selection via Web Graph Centrality** [[Paper](https://arxiv.org/abs/2606.11499)][[Project Page](https://princeton-pli.github.io/WebGraphMix/)].
 
 ![Subgraph of the Common Crawl host-level web graph. Node size is proportional to their Betweenness centrality score.](assets/web_subgraph.png)
 
@@ -22,9 +22,10 @@ cd dclm && pip install -e . && cd ..
 # 2. Download a pretrained 1B checkpoint
 ./experiments/artifacts/download.sh checkpoints
 
-# 3. Evaluate derfault model on DCLM CORE v2 (23 tasks)
+# 3. Evaluate default model on DCLM CORE v2 (23 tasks)
 export REPO_ROOT=$(pwd)
-./experiments/eval/mmlu_and_lowvar.sh
+./experiments/eval/mmlu_and_lowvar.sh                    # betweenness_alpha0.5
+# ./experiments/eval/mmlu_and_lowvar.sh random_selection  # other HF checkpoints
 
 # 4. Aggregate scores into a comparison sheet
 cd dclm/exp_data/evals && python benchmark_score_comparison.py
@@ -66,12 +67,12 @@ Path helpers live in `lib/paths.py` and are used across the pipeline scripts.
 
 ### Headline 1B experiments (Table 1)
 
-| Method | Train script | Dataset JSON |
-|--------|-------------|--------------|
-| Random baseline | `experiments/train/random.sh` | `baseline_random_corpus_32b.json` |
-| Quality (DCLM-fasttext) | `experiments/train/quality.sh` | `quality_only_dclmfilter_corpus_32b.json` |
-| WebGraphMix (50/50 betweenness) | `experiments/train/betweenness_50top.sh` | `betweenness_50top_corpus_32b.json` |
-| WebGraphMix+ (multiply 50top) | `experiments/train/multiply_betweenness_50top.sh` | `centrality_dclmfilter_multiply/regular_bottomk/betweenness_50top_corpus_32b.json` |
+| Method | HF checkpoint / model JSON | Train script | Dataset JSON |
+|--------|---------------------------|--------------|--------------|
+| Random baseline | `random_selection` | `experiments/train/random.sh` | `baseline_random_corpus_32b.json` |
+| Quality (DCLM-fasttext) | `dclm_fasttext_only` | `experiments/train/quality.sh` | `quality_only_dclmfilter_corpus_32b.json` |
+| WebGraphMix (50/50 betweenness) | `betweenness_alpha0.5` | `experiments/train/betweenness_50top.sh` | `betweenness_50top_corpus_32b.json` |
+| WebGraphMix+ (multiply 50top) | `betweenness_alpha0.5_mult_div_dclm_fasttext` | `experiments/train/multiply_betweenness_50top.sh` | `centrality_dclmfilter_multiply/regular_bottomk/betweenness_50top_corpus_32b.json` |
 
 Training uses `torchrun -m training.train` with scale `1b_1x_fast` (~28B tokens). See `dclm/training/configs/` for 400M (`411m_1x`) settings.
 

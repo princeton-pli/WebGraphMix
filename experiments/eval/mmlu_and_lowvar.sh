@@ -3,7 +3,10 @@
 #
 # Usage:
 #   MODEL_UUID=969815a0-652d-4227-a51e-020fbdda0357 ./experiments/eval/mmlu_and_lowvar.sh
-#   ./experiments/eval/mmlu_and_lowvar.sh betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000
+#   ./experiments/eval/mmlu_and_lowvar.sh betweenness_alpha0.5
+#   ./experiments/eval/mmlu_and_lowvar.sh random_selection
+#
+# Model names match HuggingFace checkpoint folders under dclm/checkpoints/.
 # Use >=2 GPUs (default) so FSDP can shard the 1B model; NUM_GPUS=1 risks OOM (SIGKILL).
 source "$(dirname "$0")/../artifacts/common.sh"
 
@@ -13,7 +16,7 @@ if [[ -n "${MODEL_UUID:-}" ]]; then
 elif [[ -n "${MODEL_FILTER}" ]]; then
   FILTER_ARG="-f name=${MODEL_FILTER}"
 else
-  FILTER_ARG="-f name=betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000"
+  FILTER_ARG="-f name=betweenness_alpha0.5"
 fi
 
 python tools/eval_expdb.py \

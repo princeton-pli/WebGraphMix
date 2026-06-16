@@ -1,7 +1,7 @@
 {
-    "name": "centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000",
-    "dataset_name": "centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b",
-    "dataset_uuid": "23345678-1234-5678-1234-567722345678",
+    "name": "betweenness_alpha0.5_mult_div_dclm_fasttext",
+    "dataset_name": "centralitydclmfiltermultiply_betweenness_50top_corpus_32b",
+    "dataset_uuid": "23345678-1234-5678-1234-567682345678",
     "hyperparameters": {
         "model": "training/open_lm_configs/open_lm_1b_swiglutorch.json",
         "tokens": 28795904000,
@@ -27,7 +27,7 @@
         "vocab_size": 50432,
         "norm": "gain_only_lp_layer_norm"
     },
-    "checkpoint_url": "${REPO_ROOT}/dclm/4gpu_1b_centralitydclmfiltermultiply_betweenness_divide_bottomk_commoncrawl_corpus_32b_training_logs/centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000/checkpoints/epoch_11.pt",
+    "checkpoint_url": "${REPO_ROOT}/dclm/checkpoints/betweenness_alpha0.5_mult_div_dclm_fasttext/epoch_11.pt",
     "open_lm_version": "0.0.34",
     "open_lm_args": [
         "--workers",
@@ -64,7 +64,7 @@
         "--lr-cooldown-end",
         "3e-05",
         "--logs",
-        "4gpu_1b_centralitydclmfiltermultiply_betweenness_divide_bottomk_commoncrawl_corpus_32b_training_logs",
+        "4gpu_1b_centralitydclmfiltermultiply_betweenness_50top_commoncrawl_corpus_32b_training_logs",
         "--attn-name",
         "torch_attn",
         "--log-logit-mean",
@@ -75,11 +75,11 @@
         "--train-num-samples",
         "2879590400",
         "--dataset-manifest",
-        "${DATA_ROOT}/../tokenized_importance_sampled_documents/centrality_dclmfilter_multiply/bottomk/divide_bottomk/betweenness_corpus_32b/manifest.jsonl",
+        "${DATA_ROOT}/../tokenized_importance_sampled_documents/centrality_dclmfilter_multiply/mix/50top/betweenness_corpus_32b/manifest.jsonl",
         "--data-key",
         "json.gz",
         "--name",
-        "centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000",
+        "centralitydclmfiltermultiply_betweenness_50top_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000",
         "--fsdp",
         "--fsdp-amp",
         "--fsdp-limit-all-gathers",
@@ -90,9 +90,9 @@
         "--torchcompile"
     ],
     "results": [],
-    "params_url": "${REPO_ROOT}/dclm/4gpu_1b_centralitydclmfiltermultiply_betweenness_divide_bottomk_commoncrawl_corpus_32b_training_logs/centralitydclmfiltermultiply_betweenness_divide_bottomk_corpus_32b-open_lm_1b_swiglutorch-warm=5000-lr=0p003-wd=0p033-cd=3e-05-bs=256-mult=1-seed=124-tokens=28795904000/params.txt",
-    "uuid": "7af43151-e06a-433f-9056-bd7ea8abefa1",
-    "creation_date": "2026_05_03-04_26_37",
+    "params_url": "${REPO_ROOT}/dclm/checkpoints/open_lm_1b_eval_params.txt",
+    "uuid": "a5dbf8e0-21e6-41ed-af9a-82856d846daf",
+    "creation_date": "2026_04_23-15_27_48",
     "failed": false,
     "error": ""
 }
